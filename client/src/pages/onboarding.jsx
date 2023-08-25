@@ -8,7 +8,25 @@ function onboarding() {
   console.log()
   const [name, setName] = useState(userInfo?.name || "");
   const [about, setAbout] = useState("");
-  const [image, setImage] = useState(userInfo?.photoURL || '/default_avatar.png')
+  const [image, setImage] = useState(userInfo?.photoURL || '/default_avatar.png');
+
+  const onboardUserHandle = async () =>{
+    if(validateDetails()){
+      const email = userInfo.email;
+      try {
+        
+      } catch (error) {
+        console.log(error)
+      }
+    }
+  }  
+
+  const validateDetails = () =>{
+    if(name.length < 3){
+      return false;
+    }
+    return true;
+  }
 
   return (
     <div className="bg-panel-header-background h-screen w-screen text-white flex flex-col items-center justify-center">
@@ -21,6 +39,9 @@ function onboarding() {
         <div className="flex flex-col items-center justify-center mt-5 gap-6">
             <Input name="Display name" state={name} setState={setName} label/>
             <Input name="About" state={about} setState={setAbout} label/>
+            <div className="flex items-center justify-center">
+              <button className="flex items-center justify-center gap-7 bg-search-input-container-background p-3 rounded-lg hover:bg-dropdown-background-hover transition-all">Create Profile</button>
+            </div>
         </div>
         <div>
           <Avatar type="xl" image={image} setImage={setImage}/>
