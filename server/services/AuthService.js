@@ -32,6 +32,7 @@ export const onboardUserService = (email, name, about, profilePicture) => new Pr
         resolve({
             msg: "Success",
             status: true,
+            data:data
         })
     } catch (error) {
         reject(error)
