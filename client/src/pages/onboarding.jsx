@@ -19,7 +19,7 @@ function onboarding() {
   
 
   useEffect(()=>{
-    if(!newUser&& !userInfo.email) router.push("/login");
+    if(!newUser&& !userInfo?.email) router.push("/login");
     else if(!newUser && userInfo.email) router.push("/");
   },[newUser,userInfo,router])
 

@@ -3,8 +3,14 @@ import { AppState } from "../store";
 import { HYDRATE } from "next-redux-wrapper";
 
 const initialState = {
-  userInfo:{},
-  newUser:false
+  userInfo:undefined,
+  newUser:false,
+  contactPage:false,
+  changeCurrentUser:undefined,
+  getMessages:undefined,
+  socket: undefined,
+  onlineUser:undefined,
+  contactsList:undefined,
 };
 
 // Actual Slice
@@ -18,6 +24,32 @@ export const authSlice = createSlice({
     setNewUser(state, action) {
       state.newUser = action.payload;
     },
+    setContactPage(state, action) {
+      state.contactPage = action.payload;
+    },
+    setChangeCurrentUser(state, action) {
+      state.changeCurrentUser = action.payload;
+    },
+    setMessages(state, action) {
+      state.getMessages = action.payload;
+    },
+    setAddMessages(state, action={}) {
+      if(state.getMessages){
+        state.getMessages =[...state.getMessages, action.payload];
+      }else{
+        state.getMessages = [action?.payload];
+      }
+      
+    },
+    setSocket(state, action) {
+      state.socket = action.payload;
+    },
+    setOnlineUser(state, action) {
+      state.onlineUser = action.payload;
+    },
+    setContactsList(state, action) {
+      state.contactsList = action.payload;
+    },
   },
   extraReducers: {
     [HYDRATE]: (state, action) => {
@@ -29,6 +61,6 @@ export const authSlice = createSlice({
   },
 });
 
-export const { setUserInfo,setNewUser } = authSlice.actions;
+export const { setContactsList,setOnlineUser, setUserInfo,setNewUser,setContactPage, setChangeCurrentUser, setMessages,setSocket,setAddMessages} = authSlice.actions;
 
 export default authSlice.reducer;
