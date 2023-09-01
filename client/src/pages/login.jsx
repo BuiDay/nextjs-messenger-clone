@@ -8,15 +8,19 @@ import { CHECK_USER_ROUTE } from "@/utils/ApiRoutes";
 import { useRouter } from "next/router";
 import { useDispatch, useSelector} from "react-redux";
 import {setUserInfo,setNewUser} from '../redux/auth/authSlice'
+
 function login() {
+
   const router = useRouter();
   const dispatch = useDispatch();
   const {userInfo, newUser} = useSelector((state)=>state.auth);
+
   const handleLoginWithGoogle = async () =>{
     const provider = new GoogleAuthProvider();
     const res = await signInWithPopup(firebaseAuth, provider)
     .then(async (result) => { 
       const {user:{displayName,email,photoURL}} = result
+      console.log(displayName)
       if(email){
         const {data} = await axios.post(CHECK_USER_ROUTE,{email})
         if(!data.status){
