@@ -19,7 +19,7 @@ function Main() {
   const dispatch = useDispatch();
 
   const socketRef = useRef();
-  const socket = { ...socketRef };
+  const socket = {...socketRef};
 
   useEffect(() => {
     if (redirectLogin) router.push('/login');
@@ -45,26 +45,27 @@ function Main() {
   })
 
   useEffect(() => {
-    socket.current = socketIOClient.connect(HOST);
-    if (userInfo) {
-      socket.current.emit("add-user", userInfo.id)
-      dispatch(setSocket(socket));
+    try {
+      socket.current = socketIOClient.connect(HOST);
+      if (userInfo) {
+        socket.current.emit("add-user", userInfo.id)
+        dispatch(setSocket(socket));
+      }
+      return () => socket.current.disconnect();
+    } catch (error) {
+      console.log(error)
     }
-    return () => socket.current.disconnect();
   }, [userInfo])
-
 
   useEffect(() => {
     if (socket.current) {
       socket.current.on("msg-recieve", (data) => {
-        console.log(1)
         dispatch(setAddMessages({
           ...data.message
         }))
       })
     }
   })
-
 
   useEffect(() => {
     if (changeCurrentUser) {

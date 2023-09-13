@@ -23,8 +23,9 @@ export const checkUserService = (email) => new Promise(async (resolve, reject) =
 
 export const onboardUserService = (email, name, about, profilePicture) => new Promise(async (resolve, reject) => {
     try {
+
         const prisma = getPrismaInstance();
-        await prisma.user.create({
+        const data = await prisma.user.create({
             data: {
                 email, name, about, profilePicture
             }
