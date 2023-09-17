@@ -1,4 +1,5 @@
 import getPrismaInstance from '../utils/PrismaClient.js'
+import { renameSync } from 'fs'
 
 export const addMessageService = (message, from, to) => new Promise(async (resolve, reject) => {
     try {
@@ -125,18 +126,18 @@ export const getInitialContactswithMessagesService = (userId) => new Promise(asy
                 if (isSender) {
                     user = { ...user, ...msg.reciever, totalUnreadMessages: 0 }
                 } else {
-                    user = { ...user, ...msg.sender, totalUnreadMessages: messageStatus !== 'read' ? 1 : 0}
+                    user = { ...user, ...msg.sender, totalUnreadMessages: messageStatus !== 'read' ? 1 : 0 }
                 }
-                users.set(calculatedId, {...user});
-            } else if (msg.messageStatus !== "read" && !isSender){
+                users.set(calculatedId, { ...user });
+            } else if (msg.messageStatus !== "read" && !isSender) {
                 const user = users.get(calculatedId);
-                users.set(calculatedId,{
+                users.set(calculatedId, {
                     ...user,
                     totalUnreadMessages: user.totalUnreadMessages + 1
                 })
             }
         })
-        if(messageStatusChange.length){
+        if (messageStatusChange.length) {
             await prisma.messages.updateMany({
                 where: {
                     id: { in: messageStatusChange }
@@ -151,10 +152,35 @@ export const getInitialContactswithMessagesService = (userId) => new Promise(asy
             status: true,
             data: {
                 user: Array.from(users.values()),
-                onlineUsers:Array.from(onlineUsers.keys())
+                onlineUsers: Array.from(onlineUsers.keys())
             }
         })
     } catch (error) {
+        reject(error)
+    }
+})
+
+export const addImageMessageService = (file, from, to) => new Promise(async (resolve, reject) => {
+    try {
+        let fileName = "uploads/images/"+file.originalname;
+        renameSync(file.path, fileName);
+        const prisma = getPrismaInstance();
+        const message = await prisma.messages.create({
+            data: {
+                message: fileName,
+                sender: { connect: { id: parseInt(from) } },
+                reciever: { connect: { id: parseInt(to) } },
+                type: "image"
+            }
+        })
+        resolve({
+            msg: "Success",
+            status: true,
+            message: message
+        })
+
+    } catch (error) {
+        console.log(error)
         reject(error)
     }
 })

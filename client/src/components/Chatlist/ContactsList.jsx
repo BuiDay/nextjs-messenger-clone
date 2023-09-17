@@ -9,6 +9,7 @@ import ChatLIstItem from "./ChatLIstItem";
 
 function ContactsList() {
   const dispatch = useDispatch();
+  const { userInfo } = useSelector((state) => state.auth);
   const [allContact, setAllContact] = useState([]);
 
   useEffect(() => {
@@ -50,11 +51,12 @@ function ContactsList() {
           </div>
           {
             Object.entries(allContact).map(([initialLetter,userList])=>{
+              const newUserList  = userList.filter((item)=> item.id !== userInfo.id)
               return(
                 <div key={Date.now()+initialLetter}>
                   <div className="text-teal-light pl-10 py-5">{initialLetter}</div>
                   {
-                    userList.map(item=>{
+                    newUserList.map(item=>{
                       return <ChatLIstItem 
                         data={item}
                         isContactPage = {true}

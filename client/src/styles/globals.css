@@ -10,3 +10,20 @@
 .custom-srcollbar::-webkit-scrollbar-thumb{
     background: #2a3942;
 }
+
+.chat-menu{
+    transition: all 0.4s ease;
+    visibility: hidden;
+    opacity: 0;
+}
+
+.chat-container:hover .chat-menu{
+    opacity: 1;
+    visibility: visible;
+} 
+
+.chat-menu__icon:hover{
+    transition: all 0.4s ease;
+    background-color: azure;
+    color: black;
+} 

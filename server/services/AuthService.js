@@ -1,5 +1,6 @@
 import getPrismaInstance from '../utils/PrismaClient.js'
 
+
 export const checkUserService = (email) => new Promise(async (resolve, reject) => {
     try {
         const prisma = getPrismaInstance()
@@ -51,7 +52,7 @@ export const getAllUserService = () => new Promise(async (resolve, reject) => {
                 profilePicture:true,
                 about:true,
                 name:true,
-            }
+            },
         })
         const userGroupedByInitialLetter = {};
         users.forEach((user)=>{
