@@ -8,6 +8,7 @@ import { CHECK_USER_ROUTE } from "@/utils/ApiRoutes";
 import { useRouter } from "next/router";
 import { useDispatch, useSelector} from "react-redux";
 import {setUserInfo,setNewUser} from '../redux/auth/authSlice'
+import { onAuthStateChanged } from "firebase/auth";
 
 function login() {
 
@@ -20,7 +21,6 @@ function login() {
     const res = await signInWithPopup(firebaseAuth, provider)
     .then(async (result) => { 
       const {user:{displayName,email,photoURL}} = result
-      console.log(displayName)
       if(email){
         const {data} = await axios.post(CHECK_USER_ROUTE,{email})
         if(!data.status){
@@ -28,7 +28,6 @@ function login() {
           dispatch(setUserInfo({name:displayName,email,photoURL,status:""}))
           dispatch(setNewUser(true))
         }else{
-          console.log(data)
           router.push('/')
           dispatch(setUserInfo({
             id:data.data.id,
@@ -42,11 +41,17 @@ function login() {
     })
   }
 
+  onAuthStateChanged(firebaseAuth, async (currentUser) => {
+    if(currentUser){
+      router.push("/")
+    }
+  })
+
   useEffect(()=>{
     if(userInfo?.id && !newUser){
       router.push("/")
     }
-  },[userInfo,newUser])
+  },[])
 
   return (
     <div className=" flex items-center justify-center bg-panel-header-background h-screen w-screen flex-col gap-6">

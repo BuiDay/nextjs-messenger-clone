@@ -1,4 +1,5 @@
 import getPrismaInstance from '../utils/PrismaClient.js'
+import {generateToken04} from '../utils/TokenGenerator.js'
 
 
 export const checkUserService = (email) => new Promise(async (resolve, reject) => {
@@ -72,3 +73,19 @@ export const getAllUserService = () => new Promise(async (resolve, reject) => {
     }
 })
 
+export const generateTokenService = (userId) => new Promise((resolve, reject) => {
+    try {
+        const appId = parseInt(process.env.ZEGO_APPID);
+        const serverSecret = process.env.ZEGO_SERVERSECRET;
+        const effectiveTime = 3600;
+        const payload = " ";
+        const token = generateToken04(appId,userId,serverSecret,effectiveTime,payload);
+        resolve({
+            msg: "Success",
+            status: true,
+            token: token
+        })
+    } catch (error) {
+        reject(error)
+    }
+})

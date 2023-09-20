@@ -1,5 +1,5 @@
 import { ADD_IMAGE_MESSAGE_ROUTE, ADD_MESSAGES_ROUTE } from "@/utils/ApiRoutes";
-import dynamic from "next/dynamic";
+import dynamic from "next/dynamic"; 
 import axios from "axios";
 import React, { useState, useRef, useEffect } from "react";
 import { BsEmojiSmile } from "react-icons/bs";
@@ -167,13 +167,13 @@ function MessageBar() {
                 grabPhoto && <PhotoPicker onChange={handlePhotoPicker} />
               }
             </div>
-            <div className="w-full rounded-lg h-[60px] flex items-center">
+            <div className="w-full rounded-2xl h-[60px] flex items-center">
               <input
                 type="text"
                 placeholder="Type a messages"
                 value={message}
                 onKeyDown={e => { if (e.code === 'Enter') { handleSendMessages() } }}
-                className="bg-input-background text-md focus:outline-none text-white rounded-lg p-4 w-full"
+                className="bg-input-background text-md focus:outline-none text-white rounded-2xl p-4 w-full"
                 onChange={(e) => handleSetMessages(e.target.value)}
               />
             </div>

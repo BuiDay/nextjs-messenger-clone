@@ -3,9 +3,12 @@ import { FaMicrophone, FaPauseCircle, FaPlay, FaStop, FaTrash,FaCircle } from "r
 import { MdSend } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
 import WaveSurfer from "wavesurfer.js";
+import { setAddMessages } from "../../redux/auth/authSlice";
+import { ADD_AUDIO_MESSAGE_ROUTE} from "@/utils/ApiRoutes";
+import axios from "axios";
 
 function CaptureAudio({ setIsShowAudioRecorder }) {
-
+  const dispatch = useDispatch();
   const { userInfo, socket, changeCurrentUser } = useSelector((state) => state.auth);
 
   const [isRecording, setIsRecording] = useState(false);
@@ -18,7 +21,7 @@ function CaptureAudio({ setIsShowAudioRecorder }) {
   const [renderedAudio, setRenderedAudio] = useState(null)
 
   const audioRef = useRef(null);
-  const mediaRecorderRef = useRef(null);
+  const mediaRecorderRef = useRef(null);  
   const wareformRef = useRef(null);
 
   useEffect(() => {
@@ -63,6 +66,7 @@ function CaptureAudio({ setIsShowAudioRecorder }) {
     setCurrentPlaybackTime(0);
     setTotalDuration(0);
     setIsRecording(true);
+    setRenderedAudio(null);
     navigator.mediaDevices
       .getUserMedia({ audio: true })
       .then((stream) => {
@@ -77,7 +81,10 @@ function CaptureAudio({ setIsShowAudioRecorder }) {
           const audioURL = URL.createObjectURL(blob);
           const audio = new Audio(audioURL);
           setRecordedAudio(audio);
+          console.log(wareform)
           wareform.load(audioURL);
+          const tracks = stream.getTracks();
+          tracks.forEach(track => track.stop());
         }
         mediaRecorder.start();
       })
@@ -96,7 +103,6 @@ function CaptureAudio({ setIsShowAudioRecorder }) {
     }
   }, [recordedAudio])
 
-
   const handlePlayRecording = () => {
     if (recordedAudio) {
       wareform.play();
@@ -107,7 +113,7 @@ function CaptureAudio({ setIsShowAudioRecorder }) {
 
   const handleStopRecording = () => {
     if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
+      mediaRecorderRef.current.stop()
       setIsRecording(false)
       wareform.stop();
 
@@ -131,7 +137,33 @@ function CaptureAudio({ setIsShowAudioRecorder }) {
   }
 
   const sendRecording = async () => {
-
+      try {
+        const formData = new FormData();
+        formData.append("audio", renderedAudio);
+        const { data } = await axios.post(ADD_AUDIO_MESSAGE_ROUTE, formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+          params: {
+            from: userInfo.id,
+            to: changeCurrentUser.id
+          }
+        })
+        if (data.status) {
+          socket.current.emit("send-msg", {
+            to: changeCurrentUser.id,
+            from: userInfo.id,
+            message: data.message,
+          });
+          setRenderedAudio(null);
+          setIsShowAudioRecorder(false);
+          dispatch(
+            setAddMessages({
+              ...data.message,
+            })
+          );
+        }
+      } catch (error) {
+        console.log(error)
+      }
   }
 
   const formatTime = (time) => {
@@ -144,7 +176,9 @@ function CaptureAudio({ setIsShowAudioRecorder }) {
   return (
     <div className="flex text-2xl w-full justify-end items-center">
       <div className="pt-1">
-        <FaTrash className="text-panel-header-icon cursor-pointer" onClick={() => setIsShowAudioRecorder(false)} />
+        {
+          !isRecording && <FaTrash className="text-panel-header-icon cursor-pointer" onClick={() => setIsShowAudioRecorder(false)} />
+        }
       </div>
       <div className="mx-4 py-2 px-4 text-white text-lg flex gap-3 justify-center items-center bg-search-input-container-background rounded-full drop-shadow-lg">
         {
@@ -184,7 +218,8 @@ function CaptureAudio({ setIsShowAudioRecorder }) {
         }
       </div>
       <div>
-        <MdSend className="text-panel-header-icon cursor-pointer mr-4" title="Send" onClick={() => sendRecording()} />
+        { !isRecording && <MdSend className="text-panel-header-icon cursor-pointer mr-4" title="Send" onClick={() => sendRecording()} />}
+       
       </div>
     </div>
   );

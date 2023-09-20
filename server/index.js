@@ -10,6 +10,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/uploads/images", express.static("uploads/images"));
+app.use("/uploads/recordings", express.static("uploads/recordings"));
 
 initRoutes(app);
 
@@ -28,9 +29,16 @@ global.onlineUsers = new Map();
 io.on("connection",(socket)=>{
     global.chatSocket = socket;
     socket.on("add-user",(userId)=>{
-        onlineUsers.set(userId.toString(), socket.id)
-        console.log(onlineUsers)
+        onlineUsers.set(userId.toString(), socket.id);
+        socket.emit('online-users',{
+            onlineUsers:Array.from(onlineUsers.keys())
+        })
     })
+
+    socket.on('disconnect',()=>{
+       
+    })
+    
     socket.on('send-msg',(data)=>{
         const sendUserSocket = onlineUsers.get(data.to.toString());
         if(sendUserSocket){
@@ -39,9 +47,55 @@ io.on("connection",(socket)=>{
                 message:data.message
             })
         }
-        socket.on('disconnect',()=>{
-            console.log(1)
-        })
     })
+
+    socket.on("going-voice-call",(data)=>{
+        const sendUserSocket = onlineUsers.get(data.to.toString());
+        if(sendUserSocket){
+            socket.to(sendUserSocket).emit('incoming-voice-call',{
+                from:data.from,
+                roomId:data.roomId,
+                callType:data.callType
+            })
+        }
+    })
+
+    socket.on("going-video-call",(data)=>{
+        const sendUserSocket = onlineUsers.get(data.to.toString());
+        if(sendUserSocket){
+            socket.to(sendUserSocket).emit('incoming-video-call',{
+                from:data.from,
+                roomId:data.roomId,
+                callType:data.callType
+            })
+        }
+    })
+
+    socket.on("reject-voice-call",(data)=>{
+        const sendUserSocket = onlineUsers.get(data.from.toString());
+        if(sendUserSocket){
+            socket.to(sendUserSocket).emit('voice-call-rejected')
+        }
+    })
+
+    socket.on("reject-video-call",(data)=>{
+        const sendUserSocket = onlineUsers.get(data.from.toString());
+        if(sendUserSocket){
+            socket.to(sendUserSocket).emit('video-call-rejected')
+        }
+    })
+
+    socket.on("accept-incoming-call",({id})=>{
+        const sendUserSocket = onlineUsers.get(id.toString());
+        socket.to(sendUserSocket).emit('accept-call')
+    })
+
+    socket.on("signout",(userId)=>{
+        console.log("sign-out",userId)
+        onlineUsers.delete(userId,toString());
+        socket.broadcast.emit('online-users',{
+            onlineUsers:Array.from(onlineUsers.keys())
+        })
    
+    })
 })

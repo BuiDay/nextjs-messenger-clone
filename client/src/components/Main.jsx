@@ -7,19 +7,23 @@ import axios from "axios";
 import { CHECK_USER_ROUTE, GET_MESSAGES_ROUTE, HOST } from "@/utils/ApiRoutes";
 import { useRouter } from "next/router";
 import { useSelector, useDispatch } from "react-redux";
-import { setUserInfo, setMessages, setAddMessages, setSocket } from '../redux/auth/authSlice'
+import { setUserInfo, setMessages, setAddMessages, setSocket, setIncomingVideoCall, setIncomingVoiceCall, setEndCall, setOnlineUser } from '../redux/auth/authSlice'
 import Chat from "./Chat/Chat";
 import socketIOClient from 'socket.io-client'
+import SearchMessages from "./Chat/SearchMessages";
+import VideoCall from "./Call/VideoCall";
+import VoiceCall from "./Call/VoiceCall";
+import IncomingVideoCall from "./common/IncomingVideoCall";
+import IncomingCall from "./common/IncomingCall";
 
 function Main() {
   const [redirectLogin, setRedirecLogin] = useState(false);
-  const [socketEvent, setSocketEvent] = useState(false);
-  const { userInfo, changeCurrentUser,getMessages } = useSelector((state) => state.auth)
+  const { userInfo, changeCurrentUser, searchMessagePage, videoCall, voiceCall, incomingVoiceCall, incomingVideoCall } = useSelector((state) => state.auth)
   const router = useRouter();
   const dispatch = useDispatch();
 
   const socketRef = useRef();
-  const socket = {...socketRef};
+  const socket = { ...socketRef };
 
   useEffect(() => {
     if (redirectLogin) router.push('/login');
@@ -31,9 +35,6 @@ function Main() {
       const { data } = await axios.post(CHECK_USER_ROUTE, {
         email: currentUser.email
       })
-      if (!data.status) {
-        router.push('/login')
-      }
       dispatch(setUserInfo({
         id: data.data?.id,
         name: data.data?.name,
@@ -41,6 +42,9 @@ function Main() {
         profileImage: data.data?.profilePicture,
         status: data.data?.about
       }))
+      if (!data.status) {
+        router.push('/login')
+      }
     }
   })
 
@@ -64,6 +68,35 @@ function Main() {
           ...data.message
         }))
       })
+
+      socket.current.on('incoming-voice-call', ({ from, roomId, callType }) => {
+        dispatch(setIncomingVoiceCall({
+          ...from,
+          roomId,
+          callType
+        }))
+      })
+
+      socket.current.on('incoming-video-call', ({ from, roomId, callType }) => {
+        dispatch(setIncomingVideoCall({
+          ...from,
+          roomId,
+          callType
+        }))
+      })
+
+      socket.current.on('voice-call-rejected', (data) => {
+        dispatch(setEndCall())
+      })
+
+      socket.current.on('video-call-rejected', () => {
+        dispatch(setEndCall())
+      })
+
+      socket.current.on('online-users', (onlineUsers) => {
+        console.log(onlineUsers)
+        dispatch(setOnlineUser(onlineUsers))
+      })
     }
   })
 
@@ -77,13 +110,48 @@ function Main() {
     }
   }, [changeCurrentUser])
 
+
   return (
-    <div className="grid grid-cols-main h-screen w-screen max-h-screen max-w-full over">
-      <ChatList />
+    <>
       {
-        changeCurrentUser ? <Chat /> : <Empty />
+        incomingVideoCall && <IncomingVideoCall />
       }
-    </div>
+      {
+        incomingVoiceCall && <IncomingCall />
+      }
+      {
+        videoCall && (
+          <div className="h-screen w-screen max-h-full overflow-hidden">
+            <VideoCall />
+          </div>
+        )
+      }
+      {
+        voiceCall && (
+          <div className="h-screen w-screen max-h-full overflow-hidden">
+            <VoiceCall />
+          </div>
+        )
+      }
+      {
+        !videoCall && !voiceCall && (
+          <div className="grid grid-cols-main h-screen w-screen max-h-screen max-w-full over">
+            <ChatList />
+            {
+              changeCurrentUser ? (
+                <div className={searchMessagePage ? "grid grid-cols-2" : "grid-cols-2"}>
+                  <Chat />
+                  {
+                    searchMessagePage && <SearchMessages />
+                  }
+                </div>
+              )
+                : <Empty />
+            }
+          </div>
+        )
+      }
+    </>
   )
 }
 

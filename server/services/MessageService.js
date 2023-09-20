@@ -184,3 +184,29 @@ export const addImageMessageService = (file, from, to) => new Promise(async (res
         reject(error)
     }
 })
+
+export const addAudioMessageService = (file, from, to) => new Promise(async (resolve, reject) => {
+    try {
+        const date = Date.now()
+        let fileName = "uploads/recordings/"+ date  + file.originalname ;
+        renameSync(file.path, fileName);
+        const prisma = getPrismaInstance();
+        const message = await prisma.messages.create({
+            data: {
+                message: fileName,
+                sender: { connect: { id: parseInt(from) } },
+                reciever: { connect: { id: parseInt(to) } },
+                type: "audio"
+            }
+        })
+        resolve({
+            msg: "Success",
+            status: true,
+            message: message
+        })
+
+    } catch (error) {
+        console.log(error)
+        reject(error)
+    }
+})

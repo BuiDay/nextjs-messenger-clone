@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 .custom-srcollbar::-webkit-scrollbar{
-    height: 8px important!;
+    height: 3px important!;
     width: 8px;
 }
 
@@ -27,3 +27,37 @@
     background-color: azure;
     color: black;
 } 
+
+.dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #fff;
+  margin-left:10px;
+}
+
+@keyframes jumpingAnimation {
+  0 {
+    transform: translate(0, 0);
+  }
+  16% {
+    transform: translate(0, -15px);
+  }
+  33% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+.container-dots .dot:nth-last-child(1) {
+  animation: jumpingAnimation 1.2s 0.2s ease-in infinite;
+}
+.container-dots .dot:nth-last-child(2) {
+  animation: jumpingAnimation 1.2s 0.4s ease-in infinite;
+}
+.container-dots .dot:nth-last-child(3) {
+  animation: jumpingAnimation 1.2s 0.6s ease-in infinite;
+}

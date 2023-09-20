@@ -1,11 +1,19 @@
 import { calculateTime } from "@/utils/CalculateTime";
-import React, { useEffect, createRef, useState, useRef } from "react";
+import React, { useEffect, createRef, useState, useRef, use } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import MessageStatus from "../common/MessageStatus";
 import ImageMessage from "./ImageMessage";
 import { BsThreeDots, BsEmojiSmile } from 'react-icons/bs'
 import ReactionMenu from "../common/ReactionMenu";
+import dynamic from "next/dynamic";
+import { setSearchMessageIdTemp } from "@/redux/auth/authSlice";
 
+const VoiceMessage = dynamic(
+  () => {
+    return import("./VoiceMessage");
+  },
+  { ssr: false }
+);
 const reacttionMenuList = [
   {
     img: "https://cdn.jsdelivr.net/npm/emoji-datasource-apple/img/apple/64/2764-fe0f.png",
@@ -33,13 +41,13 @@ const reacttionMenuList = [
 ]
 
 function ChatContainer() {
-  const { getMessages, changeCurrentUser } = useSelector((state) => state.auth);
+  const { getMessages, changeCurrentUser, searchMessageId,searchMessageIdTemp } = useSelector((state) => state.auth);
   const messagesEndRef = createRef()
   const reactionMenuRef = useRef(null)
   const [isShowReactionMenu, setIsShowReactionMenu] = useState(false)
   const [isChatId, setIsChatId] = useState()
   const [contextMenuCordinates, setContextMenuCordinates] = useState({ x: 0, y: 0 });
-
+  const dispatch = useDispatch();
   const handleReactionMenu = (event, id) => {
     event.preventDefault();
     setIsChatId(id);
@@ -52,17 +60,42 @@ function ChatContainer() {
     messagesEndRef.current.scrollTo(0, scroll);
   }
 
+  useEffect(() => {
+    if(searchMessageIdTemp){
+      const element = document.getElementById(`${searchMessageIdTemp}`);
+      element.style.removeProperty("background-color");
+    }
+    if(searchMessageId){
+      dispatch(setSearchMessageIdTemp(searchMessageId))
+    }else{
+      dispatch(setSearchMessageIdTemp(null))
+    }
+  }, [searchMessageId])
+
   useEffect(()=>{
+    if(searchMessageIdTemp === searchMessageId){
+      const element = document.getElementById(`${searchMessageIdTemp}`);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+        element.setAttribute("style", "background-color:#B22222");
+      }
+    }else{
+      const element = document.getElementById(`${searchMessageIdTemp}`);
+      element.style.removeProperty("background-color");
+    }
+  },[searchMessageIdTemp])
+
+  useEffect(() => {
     const handleClick = (event) => {
-      if(!event.target?.id.includes(`reaction-menu`)){
-        if(reactionMenuRef.current && !reactionMenuRef.current.contains(event.target)){
-          setIsShowReactionMenu(false); 
+      if (!event.target?.id.includes(`reaction-menu`)) {
+        if (reactionMenuRef.current && !reactionMenuRef.current.contains(event.target)) {
+          setIsShowReactionMenu(false);
         }
       }
     }
-    document.addEventListener('click',(e)=>handleClick(e));
-    return document.removeEventListener('click',(e)=>handleClick(e));
-  },[])
+    document.addEventListener('click', (e) => handleClick(e));
+    return document.removeEventListener('click', (e) => handleClick(e));
+  }, [])
 
   useEffect(() => {
     scrollToBottom();
@@ -77,11 +110,11 @@ function ChatContainer() {
               {
                 getMessages && getMessages?.map((message, index) => {
                   return (
-                    <div className="relative">
+                    <div className="relative"> 
                       <div key={message?.id} className={`chat-container flex ${(message?.senderId === changeCurrentUser?.id) ? "justify-end flex-row-reverse" : "justify-end"} items-center gap-2`}>
                         <div className={`flex gap-2 ${(message?.senderId === changeCurrentUser?.id) ? "justify-end flex-row-reverse" : "justify-end"}`}>
-                          <div className="flex justify-center items-center cursor-pointer"  ref={reactionMenuRef} >
-                            <div className="chat-menu__icon text-white text-xl rounded-full chat-menu"  onClick={(e) => handleReactionMenu(e, message?.id)}>
+                          <div className="flex justify-center items-center cursor-pointer" ref={reactionMenuRef} >
+                            <div className="chat-menu__icon text-white text-xl rounded-full chat-menu" onClick={(e) => handleReactionMenu(e, message?.id)}>
                               <BsEmojiSmile id={`reaction-menu_${message?.id}`} />
                             </div>
                             {
@@ -95,8 +128,8 @@ function ChatContainer() {
                           </div>
                         </div>
                         {message.type === 'text' && (
-                          <div className={` text-white px-3 py-[7px] text-md rounded-md flex gap-2 items-center ${message?.senderId === changeCurrentUser?.id ? "bg-incoming-background" : "bg-outgoing-background"}`}>
-                            <span className="break-all">{message.message}</span>
+                          <div id={`message ${message.id}`} className={`chat-message text-white px-3 py-[7px] text-md rounded-md flex gap-2 items-center ${message?.senderId === changeCurrentUser?.id ? "bg-incoming-background" : "bg-outgoing-background"}`}>
+                            <span className="break-all max-w-[400px]">{message.message}</span>
                             <div className="flex gap-1 items-end">
                               <span className="text-bubble-meta text-[14px] min-w-fit">
                                 {calculateTime(message.createdAt)}
@@ -112,6 +145,9 @@ function ChatContainer() {
                         )}
                         {
                           message.type === 'image' && <ImageMessage message={message} />
+                        }
+                        {
+                          message.type === 'audio' && <VoiceMessage message={message} />
                         }
                       </div>
                     </div>
