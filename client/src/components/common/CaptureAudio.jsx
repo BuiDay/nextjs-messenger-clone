@@ -81,7 +81,6 @@ function CaptureAudio({ setIsShowAudioRecorder }) {
           const audioURL = URL.createObjectURL(blob);
           const audio = new Audio(audioURL);
           setRecordedAudio(audio);
-          console.log(wareform)
           wareform.load(audioURL);
           const tracks = stream.getTracks();
           tracks.forEach(track => track.stop());

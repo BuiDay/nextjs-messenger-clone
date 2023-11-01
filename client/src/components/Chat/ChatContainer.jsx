@@ -7,6 +7,7 @@ import { BsThreeDots, BsEmojiSmile } from 'react-icons/bs'
 import ReactionMenu from "../common/ReactionMenu";
 import dynamic from "next/dynamic";
 import { setSearchMessageIdTemp } from "@/redux/auth/authSlice";
+import MessageRection from "../common/MessageRection";
 
 const VoiceMessage = dynamic(
   () => {
@@ -110,7 +111,7 @@ function ChatContainer() {
               {
                 getMessages && getMessages?.map((message, index) => {
                   return (
-                    <div className="relative"> 
+                    <div className="xxx relative"> 
                       <div key={message?.id} className={`chat-container flex ${(message?.senderId === changeCurrentUser?.id) ? "justify-end flex-row-reverse" : "justify-end"} items-center gap-2`}>
                         <div className={`flex gap-2 ${(message?.senderId === changeCurrentUser?.id) ? "justify-end flex-row-reverse" : "justify-end"}`}>
                           <div className="flex justify-center items-center cursor-pointer" ref={reactionMenuRef} >
@@ -118,7 +119,7 @@ function ChatContainer() {
                               <BsEmojiSmile id={`reaction-menu_${message?.id}`} />
                             </div>
                             {
-                              isShowReactionMenu && isChatId === message?.id && <ReactionMenu reacttionMenuList={reacttionMenuList} contextMenuCordinates={contextMenuCordinates} chatId={isChatId} />
+                              isShowReactionMenu && isChatId === message?.id && <ReactionMenu reacttionMenuList={reacttionMenuList} setIsShowReactionMenu={setIsShowReactionMenu} contextMenuCordinates={contextMenuCordinates} chatId={isChatId} />
                             }
                           </div>
                           <div className=" rounded-full flex justify-center items-center cursor-pointer">
@@ -128,10 +129,15 @@ function ChatContainer() {
                           </div>
                         </div>
                         {message.type === 'text' && (
-                          <div id={`message ${message.id}`} className={`chat-message text-white px-3 py-[7px] text-md rounded-md flex gap-2 items-center ${message?.senderId === changeCurrentUser?.id ? "bg-incoming-background" : "bg-outgoing-background"}`}>
-                            <span className="break-all max-w-[400px]">{message.message}</span>
+                          <div id={`message ${message.id}`} className={`chat-message  text-white px-3 py-[7px] text-md flex gap-2 items-center relative ${message?.senderId === changeCurrentUser?.id ? "bg-incoming-background chat-message-reciever" : "bg-outgoing-background chat-message-sender"}`}>
+                            <span className="break-all md:max-w-[500px] max-w-[200px] w-full">{message.message}</span>
+                            {
+                              message.reaction?.length > 0 && message.reaction.map((item,index)=>{
+                                return <MessageRection key={index} type={item.type}/>
+                              })
+                            }
                             <div className="flex gap-1 items-end">
-                              <span className="text-bubble-meta text-[14px] min-w-fit">
+                              <span className="text-bubble-meta text-[14px] whitespace-nowrap">
                                 {calculateTime(message.createdAt)}
                               </span>
                               <span>

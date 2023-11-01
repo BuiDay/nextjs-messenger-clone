@@ -94,6 +94,6 @@ export const authSlice = createSlice({
   },
 });
 
-export const { setIncomingVideoCall, setEndCall, setSearchMessageIdTemp,setIncomingVoiceCall, setVoiceCall, setSearchMessageId, setVideoCall, setContactsList, setOnlineUser, setUserInfo, setNewUser, setContactPage, setChangeCurrentUser, setMessages, setSocket, setAddMessages, setSearchMessagePage } = authSlice.actions;
+export const {setIncomingVideoCall, setEndCall, setSearchMessageIdTemp,setIncomingVoiceCall, setVoiceCall, setSearchMessageId, setVideoCall, setContactsList, setOnlineUser, setUserInfo, setNewUser, setContactPage, setChangeCurrentUser, setMessages, setSocket, setAddMessages, setSearchMessagePage } = authSlice.actions;
 
 export default authSlice.reducer;

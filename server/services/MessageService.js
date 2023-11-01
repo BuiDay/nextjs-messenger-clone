@@ -28,10 +28,10 @@ export const addMessageService = (message, from, to) => new Promise(async (resol
     }
 })
 
-export const getMessagesService = (from, to) => new Promise(async (resolve, reject) => {
+export const getMessagesService = (from, to, take) => new Promise(async (resolve, reject) => {
     try {
         const prisma = getPrismaInstance();
-        const messages = await prisma.messages.findMany({
+        const count =  await prisma.messages.count({
             where: {
                 OR: [
                     {
@@ -43,6 +43,30 @@ export const getMessagesService = (from, to) => new Promise(async (resolve, reje
                         recieverId: parseInt(to)
                     }
                 ]
+            },
+        })
+        console.log(count)
+        const messages = await prisma.messages.findMany({
+            // skip:count-parseInt(take) > 0 ? count-parseInt(take) : 0,
+
+            where: {
+                OR: [
+                    {
+                        senderId: parseInt(to),
+                        recieverId: parseInt(from)
+                    },
+                    {
+                        senderId: parseInt(from),
+                        recieverId: parseInt(to)
+                    }
+                ]
+            },
+            include: {
+                reaction: {
+                    include: {
+                        reactionUser: true
+                    }
+                }
             },
             orderBy: {
                 id: "asc"
@@ -106,7 +130,7 @@ export const getInitialContactswithMessagesService = (userId) => new Promise(asy
                 }
             }
         )
-        const messages = [...user.sentMessages, ...user.revieverMessages];
+        const messages = [...user?.sentMessages, ...user?.revieverMessages];
         messages.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
         const users = new Map();
@@ -162,7 +186,7 @@ export const getInitialContactswithMessagesService = (userId) => new Promise(asy
 
 export const addImageMessageService = (file, from, to) => new Promise(async (resolve, reject) => {
     try {
-        let fileName = "uploads/images/"+file.originalname;
+        let fileName = "uploads/images/" + file.originalname;
         renameSync(file.path, fileName);
         const prisma = getPrismaInstance();
         const message = await prisma.messages.create({
@@ -188,7 +212,7 @@ export const addImageMessageService = (file, from, to) => new Promise(async (res
 export const addAudioMessageService = (file, from, to) => new Promise(async (resolve, reject) => {
     try {
         const date = Date.now()
-        let fileName = "uploads/recordings/"+ date  + file.originalname ;
+        let fileName = "uploads/recordings/" + date + file.originalname;
         renameSync(file.path, fileName);
         const prisma = getPrismaInstance();
         const message = await prisma.messages.create({

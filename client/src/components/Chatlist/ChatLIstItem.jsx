@@ -11,7 +11,9 @@ function ChatLIstItem({ data, isContactPage = false }) {
 
   const dispatch = useDispatch();
   const { userInfo } = useSelector((state) => state.auth)
+
   const handleContactClick = () => {
+    console.log(data)
     dispatch(setChangeCurrentUser(data))
     dispatch(setContactPage(false))
   }

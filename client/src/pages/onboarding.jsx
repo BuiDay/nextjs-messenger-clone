@@ -18,10 +18,10 @@ function onboarding() {
   const [image, setImage] = useState('/default_avatar.png');
   
 
-  useEffect(()=>{
-    if(!newUser&& !userInfo?.email) router.push("/login");
-    else if(!newUser && userInfo.email) router.push("/");
-  },[newUser,userInfo,router])
+  // useEffect(()=>{
+  //   if(!newUser&& !userInfo?.email) router.push("/login");
+  //   else if(!newUser && userInfo.email) router.push("/");
+  // },[newUser,userInfo,router])
 
   const onboardUserHandle = async () =>{
     if(validateDetails()){
@@ -31,7 +31,7 @@ function onboarding() {
           email,name,about,image
         });
         if(data.status){
-          dispatch(setUserInfo({name,email,profileImage:image,status:about}))
+          dispatch(setUserInfo({id:data.data.id,name,email,profileImage:image,status:about}))
           dispatch(setNewUser(false))
           router.push('/')
         }
@@ -51,11 +51,16 @@ function onboarding() {
   return (
     <div className="bg-panel-header-background h-screen w-screen text-white flex flex-col items-center justify-center">
       <div className="flex items-center justify-center gap-2">
-        <Image src="/whatsapp.gif" alt="logo" width={300} height={300} />
-        <span className="text-7xl">Whatsapp</span>
+          <div className="md:block hidden">
+            <Image src="/favicon1.png" width={200} height={200} alt="logo"/>
+          </div>
+          <div className="md:hidden block">
+            <Image src="/favicon1.png" width={100} height={100} alt="logo"/>
+          </div>
+        <span className="md:text-7xl text-4xl">Whatsapp</span>
       </div>
       <h2 className="text-2xl">Create your profile</h2>
-      <div className="flex gap-6 mt-6">
+      <div className="flex gap-6 mt-6 md:flex-row flex-col-reverse">
         <div className="flex flex-col items-center justify-center mt-5 gap-6">
             <Input name="Display name" state={name} setState={setName} label/>
             <Input name="About" state={about} setState={setAbout} label/>

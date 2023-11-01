@@ -1,12 +1,11 @@
 import { setEndCall, setIncomingVoiceCall, setVoiceCall } from "@/redux/auth/authSlice";
 import Image from "next/image";
-import React from "react";
+import React,{useState,useEffect} from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 function IncomingCall() {
   const { incomingVoiceCall, socket, userInfo, videoCall } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
-
 
   const acceptCall = () => {
     dispatch(setVoiceCall({
@@ -43,6 +42,7 @@ function IncomingCall() {
           </button>
         </div>
       </div>
+
     </div>
   )
 }

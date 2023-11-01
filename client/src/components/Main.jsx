@@ -18,32 +18,39 @@ import IncomingCall from "./common/IncomingCall";
 
 function Main() {
   const [redirectLogin, setRedirecLogin] = useState(false);
-  const { userInfo, changeCurrentUser, searchMessagePage, videoCall, voiceCall, incomingVoiceCall, incomingVideoCall } = useSelector((state) => state.auth)
+  const { userInfo, changeCurrentUser,reaction, searchMessagePage, videoCall, voiceCall, incomingVoiceCall, incomingVideoCall } = useSelector((state) => state.auth)
   const router = useRouter();
   const dispatch = useDispatch();
 
   const socketRef = useRef();
-  const socket = { ...socketRef };
+  const socket = { ...socketRef};
 
   useEffect(() => {
     if (redirectLogin) router.push('/login');
   }, [redirectLogin])
 
   onAuthStateChanged(firebaseAuth, async (currentUser) => {
-    if (!currentUser) setRedirecLogin(true);
+    if (!currentUser){
+      setRedirecLogin(true);
+    } 
     if (!userInfo && currentUser?.email) {
-      const { data } = await axios.post(CHECK_USER_ROUTE, {
-        email: currentUser.email
-      })
-      dispatch(setUserInfo({
-        id: data.data?.id,
-        name: data.data?.name,
-        email: data.data?.email,
-        profileImage: data.data?.profilePicture,
-        status: data.data?.about
-      }))
-      if (!data.status) {
-        router.push('/login')
+      try {
+        const { data } = await axios.post(CHECK_USER_ROUTE, {
+          email: currentUser.email
+        })
+        if(data.status){
+          dispatch(setUserInfo({
+            id: data.data?.id,
+            name: data.data?.name,
+            email: data.data?.email,
+            profileImage: data.data?.profilePicture,
+            status: data.data?.about
+          }))
+        }else{
+          router.push('/login')
+        }
+      } catch (error) {
+        console.log(error)
       }
     }
   })
@@ -52,7 +59,7 @@ function Main() {
     try {
       socket.current = socketIOClient.connect(HOST);
       if (userInfo) {
-        socket.current.emit("add-user", userInfo.id)
+        socket.current.emit("add-user", userInfo?.id)
         dispatch(setSocket(socket));
       }
       return () => socket.current.disconnect();
@@ -94,22 +101,35 @@ function Main() {
       })
 
       socket.current.on('online-users', (onlineUsers) => {
-        console.log(onlineUsers)
+        dispatch(setOnlineUser(onlineUsers))
+      })
+  
+      socket.current.on("reaction-message-recieve", (data) => {
+        dispatch(setMessages(data.message))
+      })
+
+      socket.current.on('online-users', (onlineUsers) => {
         dispatch(setOnlineUser(onlineUsers))
       })
     }
   })
 
   useEffect(() => {
-    if (changeCurrentUser) {
-      const getMessages = async () => {
-        const { data } = await axios.get(`${GET_MESSAGES_ROUTE}/${userInfo?.id}/${changeCurrentUser?.id}`)
-        dispatch(setMessages(data.messages))
+    try{
+      if (changeCurrentUser) {
+        const getMessages = async () => {
+          const { data } = await axios.get(`${GET_MESSAGES_ROUTE}/${userInfo?.id}/${changeCurrentUser?.id}`)
+          if(data){
+            dispatch(setMessages(data.messages))
+          }
+        }
+        getMessages();
       }
-      getMessages();
+    }catch(error){
+      console.log(error)
     }
+   
   }, [changeCurrentUser])
-
 
   return (
     <>
@@ -135,8 +155,20 @@ function Main() {
       }
       {
         !videoCall && !voiceCall && (
-          <div className="grid grid-cols-main h-screen w-screen max-h-screen max-w-full over">
-            <ChatList />
+          <div className="md:grid md:grid-cols-main h-screen w-screen max-h-screen max-w-full over">
+            <div className="md:block hidden h-full">
+              <ChatList />
+            </div>
+
+             
+              {
+                 !changeCurrentUser && 
+                 <div className="md:hidden block h-full">
+                    <ChatList />
+                 </div>
+              }
+               
+              
             {
               changeCurrentUser ? (
                 <div className={searchMessagePage ? "grid grid-cols-2" : "grid-cols-2"}>

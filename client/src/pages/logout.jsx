@@ -10,8 +10,7 @@ function logout() {
   const { socket,userInfo } = useSelector((state) => state.auth);
   const router = useRouter();
   useEffect(()=>{
-    console.log(socket)
-    socket.current.emit("sigout", userInfo.id)
+    // socket.current.emit("sigout", userInfo.id)
     dispatch(setUserInfo(undefined));
     dispatch(setChangeCurrentUser(undefined));
     signOut(firebaseAuth);

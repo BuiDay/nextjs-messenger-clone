@@ -7,7 +7,6 @@ export const addMessage = async (req, res) => {
             return res.status(401).json({
                 err: -1,
                 msg: "From, to, message is require",
-                error: error
             })
         }
         const response = await addMessageService(message, from, to);
@@ -23,9 +22,9 @@ export const addMessage = async (req, res) => {
 }
 
 export const getMessage = async (req, res) => {
-    const {from, to} = req.params
+    const {from, to, take} = req.params
     try {
-        const response = await getMessagesService(from, to);
+        const response = await getMessagesService(from, to, take);
         return res.status(200).json(response)
     } catch (error) {
         console.log(error)
@@ -38,8 +37,14 @@ export const getMessage = async (req, res) => {
 }
 
 export const getInitialContactswithMessages = async (req, res) => {
-    const userId = parseInt(req.params.from)
     try {
+        const userId = parseInt(req.params.from)
+        if(!userId){
+            return res.status(401).json({
+                err: -1,
+                msg: "userId is require",
+            })
+        }
         const response = await getInitialContactswithMessagesService(userId);
         return res.status(200).json(response)
     } catch (error) {

@@ -3,13 +3,52 @@ version: '3.8'
 
 services:
   postgres:
-    container_name: what_app
     image: postgres:latest
     environment:
-      POSTGRES_USER: root
+      POSTGRES_HOST: localhost
       POSTGRES_PASSWORD: 123456
       POSTGRES_DB: myapp
     ports:
-      - "5432:5432"
+      - 5432:5432
+    expose:
+      - 5432
+  backend:
+    build:
+      context: ../server
+      dockerfile: Dockerfile
+    restart: unless-stopped
+   
+      # DB_HOST: host.docker.internal
+    depends_on:
+      - postgres
+    environment:
+       DATABASE_URL: postgresql://postgres:123456@localhost:5432/myapp?schema=public&connect_timeout=60
+    ports:
+     - 8001:8001
+    expose:
+     - 8001
+    links:
+      - postgres
+     
+  nextjs:
+      build:
+        context: ../client
+        dockerfile: Dockerfile
+      ports:
+        - 3000:3000
+      expose:
+      - 3000
+      restart: always
+
+  nginx:
+    build: ./nginx
+    ports:
+      - 80:80
+    restart: always
+    links:
+      - nextjs
+    volumes:
+    -  ../client/.next:/usr/share/nginx/html
+    # - ./nginx/default.conf:/etc/nginx/nginx.conf/default.conf
 
      #docker compose -p tmsky-nodejs-mysql up -d

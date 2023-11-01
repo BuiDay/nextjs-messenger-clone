@@ -1,5 +1,5 @@
 
-import { checkUserService, onboardUserService, getAllUserService,generateTokenService } from '../services/AuthService.js'
+import { checkUserService, onboardUserService, getAllUserService, generateTokenService, reactionMessageService } from '../services/AuthService.js'
 
 export const checkUser = async (req, res) => {
     const { email } = req.body;
@@ -59,10 +59,25 @@ export const getAllUser = async (req, res) => {
     }
 }
 
-export const generateToken = async (req, res) =>{
+export const generateToken = async (req, res) => {
     try {
         const userId = req.params.id;
         const response = await generateTokenService(userId);
+        return res.status(200).json(response)
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({
+            err: -1,
+            msg: "Fail at auth controller!",
+            error: error
+        })
+    }
+}
+
+export const reationMessages = async (req, res) => {
+    try {
+        const { userId,typeReact,messageId} = req.body.params;
+        const response = await reactionMessageService(userId, messageId, typeReact);
         return res.status(200).json(response)
     } catch (error) {
         console.log(error)

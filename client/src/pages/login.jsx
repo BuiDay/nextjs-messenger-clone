@@ -41,11 +41,11 @@ function login() {
     })
   }
 
-  onAuthStateChanged(firebaseAuth, async (currentUser) => {
-    if(currentUser){
-      router.push("/")
-    }
-  })
+  // onAuthStateChanged(firebaseAuth, async (currentUser) => {
+  //   if(currentUser){
+  //     router.push("/")
+  //   }
+  // })
 
   useEffect(()=>{
     if(userInfo?.id && !newUser){
@@ -54,10 +54,15 @@ function login() {
   },[])
 
   return (
-    <div className=" flex items-center justify-center bg-panel-header-background h-screen w-screen flex-col gap-6">
+    <div className="flex items-center justify-center bg-panel-header-background h-[100vh] w-[100vw] flex-col gap-6">
         <div className="flex items-center justify-center gap-2 text-white ">
-          <Image src="/whatsapp.gif" width={200} height={200} alt="logo"/>
-          <span className="text-7xl">Whatsapp</span>
+          <div className="md:block hidden">
+            <Image src="/favicon1.png" width={200} height={200} alt="logo"/>
+          </div>
+          <div className="md:hidden block">
+            <Image src="/favicon1.png" width={100} height={100} alt="logo"/>
+          </div>
+          <span className="md:text-7xl text-4xl">Messenger</span>
         </div>
         <button className="flex items-center justify-center gap-7 bg-search-input-container-background p-5 rounded-lg" onClick={()=>handleLoginWithGoogle()}>
           <FcGoogle className="text-4xl"/>

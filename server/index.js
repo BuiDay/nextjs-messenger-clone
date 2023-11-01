@@ -29,10 +29,15 @@ global.onlineUsers = new Map();
 io.on("connection",(socket)=>{
     global.chatSocket = socket;
     socket.on("add-user",(userId)=>{
-        onlineUsers.set(userId.toString(), socket.id);
-        socket.emit('online-users',{
-            onlineUsers:Array.from(onlineUsers.keys())
-        })
+        try {
+            onlineUsers.set(userId?.toString(), socket.id);
+            socket.emit('online-users',{
+                onlineUsers:Array.from(onlineUsers.keys())
+            })
+        } catch (error) {
+            console.log(error)
+        }
+       
     })
 
     socket.on('disconnect',()=>{
@@ -40,17 +45,22 @@ io.on("connection",(socket)=>{
     })
     
     socket.on('send-msg',(data)=>{
-        const sendUserSocket = onlineUsers.get(data.to.toString());
-        if(sendUserSocket){
-            socket.to(sendUserSocket).emit('msg-recieve',{
-                from:data.from,
-                message:data.message
-            })
+        try {
+            const sendUserSocket = onlineUsers.get(data?.to?.toString());
+            if(sendUserSocket){
+                socket.to(sendUserSocket).emit('msg-recieve',{
+                    from:data.from,
+                    message:data.message
+                })
+            }
+        } catch (error) {
+            console.log(error)
         }
+       
     })
 
     socket.on("going-voice-call",(data)=>{
-        const sendUserSocket = onlineUsers.get(data.to.toString());
+        const sendUserSocket = onlineUsers.get(data?.to?.toString());
         if(sendUserSocket){
             socket.to(sendUserSocket).emit('incoming-voice-call',{
                 from:data.from,
@@ -91,11 +101,24 @@ io.on("connection",(socket)=>{
     })
 
     socket.on("signout",(userId)=>{
-        console.log("sign-out",userId)
         onlineUsers.delete(userId,toString());
         socket.broadcast.emit('online-users',{
             onlineUsers:Array.from(onlineUsers.keys())
         })
-   
     })
+    
+    socket.on('reaction-message',(data)=>{
+        try {
+            const sendUserSocket = onlineUsers.get(data.to.toString());
+            if(sendUserSocket){
+                socket.to(sendUserSocket).emit('reaction-message-recieve',{
+                    message:data.messages
+                })
+            }
+        } catch (error) {
+            console.log(error)
+        }
+       
+    })
+
 })

@@ -18,10 +18,11 @@ function ChatList() {
   }, [contactPage])
 
   return (
-    <div className="bg-panel-header-background border-r flex flex-col max-h-screen z-20">
+    <div className="bg-panel-header-background border-r flex flex-col max-h-screen h-full z-20">
       {
         pageType === 'default' && (
           <>
+            {/* <audio id="audio" autoPlay><source src="../public/call-sound.mp3" type="audio/mp3"></source></audio> */}
             <ChatListHeader />
             <SearchBar />
             <List />

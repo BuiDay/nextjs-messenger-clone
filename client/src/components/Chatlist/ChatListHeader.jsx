@@ -18,7 +18,6 @@ function ChatListHeader() {
     e.preventDefault();
     setContextMenuCordinates({ x: e.pageX - 50, y: e.pageY + 30 });
     setIsContextMenuVisible(true)
-    console.log(isContextMenuVisible)
   }
   const contextMenuOptions = [
     {
@@ -49,8 +48,8 @@ function ChatListHeader() {
         <div className="flex justify-center items-center rounded-full p-2 shadow-lg transition-all cursor-pointer hover:bg-gray-700 " onClick={handleNewChat}>
           <BsFillChatLeftTextFill className="text-panel-header-icon text-xl" title="New Chat" />
         </div>
-        <div  id="context-opener"  className="flex justify-center items-center rounded-full p-2 shadow-lg transition-all cursor-pointer hover:bg-gray-700 " onClick={(e) => showContextMenu(e)}>
-          <BsThreeDotsVertical className="text-panel-header-icon text-xl" />
+        <div  className="flex justify-center items-center rounded-full shadow-lg transition-all cursor-pointer hover:bg-gray-700" onClick={(e) => showContextMenu(e)}>
+          <BsThreeDotsVertical id="context-opener"  className="text-panel-header-icon text-xl"/>
         </div>
         {
           isContextMenuVisible && <ContextMenu options={contextMenuOptions} cordinates={contextMenuCordinates} setContextMenu={setIsContextMenuVisible} />
